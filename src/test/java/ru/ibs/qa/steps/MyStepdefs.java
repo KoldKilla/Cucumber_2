@@ -10,6 +10,11 @@ import org.openqa.selenium.edge.EdgeDriver;
 import pages.MainPage;
 import pages.ModalWindow;
 import pages.TablePage;
+import io.github.bonigarcia.wdm.WebDriverManager;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.util.concurrent.TimeUnit;
 
@@ -19,11 +24,43 @@ public class MyStepdefs {
 
     @io.cucumber.java.Before
     public void настраиваемОкружениеВБраузере() {
-        WebDriverManager.chromedriver().setup();
+        if ("remote".equalsIgnoreCase(ConfProp.getProperty("type_driver"))) {
+            DesiredCapabilities capabilities = new DesiredCapabilities();
+            capabilities.setBrowserName(ConfProp.getProperty("type_browser"));
+            capabilities.setVersion("109.0");
+            capabilities.setCapability("selenoid:options", Map.<String, Object>of(
+                    "enableVNC", true,
+                    "enableVideo", false
+            ));
+            try {
+                driver = new RemoteWebDriver(URI.create(ConfProp.getProperty("selenoid_url")).toURL(),
+                        capabilities, true);
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
+            }
+            driver.manage().window().maximize();
+            driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(10));
+            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+            BasePage.setDriver(driver);
+            driver.get(ConfProp.getProperty("remote_url"));
+
+        } else {
+            WebDriverManager.chromedriver().setup();
+            driver = new ChromeDriver();
+            driver.manage().window().maximize();
+            driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(10));
+            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+            BasePage.setDriver(driver);
+            driver.get(ConfProp.getProperty("base_url"));
+        }
+        
+        
+        
+        /* WebDriverManager.chromedriver().setup();
         driver = new ChromeDriver();
 
         driver.manage().window().maximize();
-        driver.manage().timeouts().implicitlyWait(100, TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(100, TimeUnit.SECONDS); */
     }
 
 
