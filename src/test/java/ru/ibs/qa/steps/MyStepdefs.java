@@ -1,29 +1,37 @@
 package ru.ibs.qa.steps;
 
-
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.edge.EdgeDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import pages.ConfProp;
 import pages.MainPage;
 import pages.ModalWindow;
 import pages.TablePage;
-import io.github.bonigarcia.wdm.WebDriverManager;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.remote.RemoteWebDriver;
 
+
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.time.Duration;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 
-public class MyStepdefs {
-    WebDriver driver;
+public class MyStepdefsTest {
+   WebDriver driver;
 
     @io.cucumber.java.Before
     public void настраиваемОкружениеВБраузере() {
+        WebDriverManager.chromedriver().setup();
+        driver = new ChromeDriver();
+
+        driver.manage().window().maximize();
+        driver.manage().timeouts().implicitlyWait(100, TimeUnit.SECONDS);
+
         if ("remote".equalsIgnoreCase(ConfProp.getProperty("type_driver"))) {
             DesiredCapabilities capabilities = new DesiredCapabilities();
             capabilities.setBrowserName(ConfProp.getProperty("type_browser"));
@@ -41,7 +49,7 @@ public class MyStepdefs {
             driver.manage().window().maximize();
             driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(10));
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-            BasePage.setDriver(driver);
+            MainPage.setDriver(driver);
             driver.get(ConfProp.getProperty("remote_url"));
 
         } else {
@@ -50,17 +58,17 @@ public class MyStepdefs {
             driver.manage().window().maximize();
             driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(10));
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-            BasePage.setDriver(driver);
+            MainPage.setDriver(driver);
             driver.get(ConfProp.getProperty("base_url"));
         }
-        
-        
-        
-        /* WebDriverManager.chromedriver().setup();
-        driver = new ChromeDriver();
 
-        driver.manage().window().maximize();
-        driver.manage().timeouts().implicitlyWait(100, TimeUnit.SECONDS); */
+    }
+
+    @io.cucumber.java.After
+    public void tearDown() {
+        if(driver != null){
+            driver.quit();
+        }
     }
 
 
@@ -136,4 +144,3 @@ public class MyStepdefs {
                 .checkTable("Наименование", "Тип", "Экзотический");
     }
 }
-
