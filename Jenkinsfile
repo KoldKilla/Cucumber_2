@@ -1,13 +1,13 @@
 node('unix') {
-   stage('Github integration'){
-       checkout scm
-   }
-   stage('Build steps'){
+    stage('Git checkout') {
+        checkout scm
+    }
+    stage('Run tests') {
         withMaven(globalMavenSettingsConfig: '', jdk: '', maven: 'Default', mavenSettingsConfig: '', traceability: true) {
-            sh 'mvn clean test -Dbrowser=${browser} -Ddb=${db} -DURI=${URI} -D"cucumber.filter.tags=${value}"'
+            sh 'mvn clean test -Dtype.browser=${browser}'
         }
-   }
-   stage('Reporting'){
+    }
+    stage('Allure reports') {
         allure includeProperties: false, jdk: '', results: [[path: 'target/reports/allure-results']]
-   }
+    }
 }
